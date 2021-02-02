@@ -4,11 +4,11 @@ import { HotToastContainerComponent } from './components/hot-toast-container/hot
 import { HotToastClose, Toast, UpdateToastOptions, HotToastRefProps } from './hot-toast.model';
 
 export class HotToastRef implements HotToastRefProps {
-  updateMessage: (message: Content) => void;
-  updateToast: (options: UpdateToastOptions) => void;
-  afterClosed: Observable<HotToastClose>;
+  updateMessage!: (message: Content) => void;
+  updateToast!: (options: UpdateToastOptions) => void;
+  afterClosed!: Observable<HotToastClose>;
 
-  private _dispose: () => void;
+  private _dispose!: () => void;
   set dispose(value: () => void) {
     this._dispose = value;
   }
@@ -42,9 +42,9 @@ export class HotToastRef implements HotToastRefProps {
    * Make sure to pass { dismissedByAction: true } when closing from template
    * @memberof HotToastRef
    */
-  close(closeData: { dismissedByAction: boolean } = { dismissedByAction: false }) {
+  close(closeData: { dismissedByAction?: boolean } = { dismissedByAction: false }) {
     this._dispose();
-    this._onClosed.next({ dismissedByAction: closeData.dismissedByAction, id: this.toast.id });
+    this._onClosed.next({ dismissedByAction: closeData.dismissedByAction!, id: this.toast.id });
     this._onClosed.complete();
   }
 }

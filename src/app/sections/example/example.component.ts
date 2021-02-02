@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { HotToastClose, HotToastService } from '@ngneat/hot-toast';
 import { from, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -21,13 +21,13 @@ interface Example {
   styleUrls: ['./example.component.scss'],
 })
 export class ExampleComponent implements OnInit {
-  @ViewChild('success') successTemplate;
-  @ViewChild('error') errorTemplate;
-  @ViewChild('template') ngTemplate;
+  @ViewChild('success') successTemplate!: TemplateRef<unknown>;
+  @ViewChild('error') errorTemplate!: TemplateRef<unknown>;
+  @ViewChild('template') ngTemplate!: TemplateRef<unknown>;
 
   examples: Example[] = [];
 
-  closedEventData: HotToastClose = undefined;
+  closedEventData?: HotToastClose;
 
   snippetLanguages: { label: string; value: string }[] = [
     { label: 'TypeScript', value: 'typescript' },

@@ -8,10 +8,10 @@ import { CodeHighlightService } from 'src/app/core/services/code-highlight.servi
 })
 export class CodeComponent implements OnChanges {
   @Input() language = 'typescript';
-  @Input() containerClass: string;
-  @Input() snippet: string;
+  @Input() containerClass!: string;
+  @Input() snippet!: string;
 
-  @ViewChild('code') codeTemplateRef: ElementRef<HTMLElement>;
+  @ViewChild('code') codeTemplateRef!: ElementRef<HTMLElement>;
 
   constructor(private codeHighlightService: CodeHighlightService) {}
 

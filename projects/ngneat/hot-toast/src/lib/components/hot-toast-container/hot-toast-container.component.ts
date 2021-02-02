@@ -1,20 +1,19 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Input, QueryList, ViewChildren } from '@angular/core';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, QueryList, ViewChildren } from '@angular/core';
+import { Content } from '@ngneat/overview';
 import { Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { HOT_TOAST_MARGIN } from '../../constants';
+import { HotToastRef } from '../../hot-toast-ref';
 import {
+  AddToastRef,
+  CreateHotToastRef,
   HotToastClose,
   Toast,
   ToastConfig,
   ToastPosition,
   UpdateToastOptions,
-  AddToastRef,
-  CreateHotToastRef,
 } from '../../hot-toast.model';
-import { HotToastRef } from '../../hot-toast-ref';
-import { filter } from 'rxjs/operators';
-import { Content } from '@ngneat/overview';
 import { HotToastComponent } from '../hot-toast/hot-toast.component';
-import { HOT_TOAST_MARGIN } from '../../constants';
 
 @Component({
   selector: 'hot-toast-container',
@@ -22,9 +21,9 @@ import { HOT_TOAST_MARGIN } from '../../constants';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HotToastContainerComponent {
-  @Input() defaultConfig: ToastConfig;
+  @Input() defaultConfig!: ToastConfig;
 
-  @ViewChildren(HotToastComponent) hotToastComponentList: QueryList<HotToastComponent>;
+  @ViewChildren(HotToastComponent) hotToastComponentList!: QueryList<HotToastComponent>;
 
   toasts: Toast[] = [];
   toastRefs: CreateHotToastRef[] = [];
@@ -43,13 +42,11 @@ export class HotToastContainerComponent {
   calculateOffset(toastId: string, position: ToastPosition) {
     const visibleToasts = this.toasts.filter((t) => t.visible && t.position === position);
     const index = visibleToasts.findIndex((toast) => toast.id === toastId);
-    const offset =
-      index !== -1
-        ? visibleToasts
-            .slice(...(this.defaultConfig.reverseOrder ? [index + 1] : [0, index]))
-            .reduce((acc, t) => acc + (t.height || 0) + HOT_TOAST_MARGIN, 0)
-        : 0;
-    return offset;
+    return index !== -1
+      ? visibleToasts
+          .slice(...(this.defaultConfig.reverseOrder ? [index + 1] : [0, index]))
+          .reduce((acc, t) => acc + (t.height || 0) + HOT_TOAST_MARGIN, 0)
+      : 0;
   }
 
   updateHeight(height: number, toast: Toast) {

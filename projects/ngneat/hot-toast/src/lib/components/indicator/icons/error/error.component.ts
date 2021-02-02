@@ -8,5 +8,5 @@ import { IconTheme } from '../../../../hot-toast.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ErrorComponent {
-  @Input() theme: IconTheme;
+  @Input() theme!: IconTheme;
 }

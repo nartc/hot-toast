@@ -15,6 +15,7 @@
     "paths": {
       "@ngneat/hot-toast": ["projects/ngneat/hot-toast/src/public-api.ts"]
     },
+    "strict": true,
     "resolveJsonModule": true
   }
 }

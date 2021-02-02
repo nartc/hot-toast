@@ -8,6 +8,6 @@ import { IconTheme, ToastType } from '../../hot-toast.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IndicatorComponent {
-  @Input() theme: IconTheme;
-  @Input() type: ToastType;
+  @Input() theme!: IconTheme;
+  @Input() type!: ToastType;
 }

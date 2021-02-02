@@ -8,5 +8,5 @@ import { IconTheme } from '../../hot-toast.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnimatedIconComponent {
-  @Input() iconTheme: IconTheme;
+  @Input() iconTheme!: IconTheme;
 }

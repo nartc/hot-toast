@@ -1,6 +1,6 @@
 import { Injectable, Optional } from '@angular/core';
 import { CompRef, Content, isComponent, isTemplateRef, ViewService } from '@ngneat/overview';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { HotToastContainerComponent } from './components/hot-toast-container/hot-toast-container.component';
@@ -25,12 +25,13 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class HotToastService implements HotToastServiceMethods {
-  private _componentRef: CompRef<HotToastContainerComponent>;
+  private _componentRef!: CompRef<HotToastContainerComponent>;
 
   private _defaultConfig = new ToastConfig();
   get defaultConfig() {
     return this._defaultConfig;
   }
+
   set defaultConfig(config: ToastConfig) {
     this._defaultConfig = {
       ...this._defaultConfig,
@@ -38,6 +39,7 @@ export class HotToastService implements HotToastServiceMethods {
     };
     this._componentRef.setInput('defaultConfig', this._defaultConfig);
   }
+
   private _defaultPersistConfig = new ToastPersistConfig();
 
   constructor(private _viewService: ViewService, @Optional() config: ToastConfig) {
@@ -69,12 +71,10 @@ export class HotToastService implements HotToastServiceMethods {
    * @memberof HotToastService
    */
   show(message?: Content, options?: ToastOptions): CreateHotToastRef {
-    const toast = this.createToast(message || this._defaultConfig.blank.content, 'blank', {
+    return this.createToast(message || this._defaultConfig.blank.content!, 'blank', {
       ...this._defaultConfig,
       ...options,
-    });
-
-    return toast;
+    })!;
   }
 
   /**
@@ -86,13 +86,11 @@ export class HotToastService implements HotToastServiceMethods {
    * @memberof HotToastService
    */
   error(message?: Content, options?: ToastOptions): CreateHotToastRef {
-    const toast = this.createToast(message || this._defaultConfig.error.content, 'error', {
+    return this.createToast(message || this._defaultConfig.error.content!, 'error', {
       ...this._defaultConfig,
-      ...this._defaultConfig?.error,
+      ...this._defaultConfig.error,
       ...options,
-    });
-
-    return toast;
+    })!;
   }
 
   /**
@@ -104,13 +102,11 @@ export class HotToastService implements HotToastServiceMethods {
    * @memberof HotToastService
    */
   success(message?: Content, options?: ToastOptions): CreateHotToastRef {
-    const toast = this.createToast(message || this._defaultConfig.success.content, 'success', {
+    return this.createToast(message || this._defaultConfig.success.content!, 'success', {
       ...this._defaultConfig,
-      ...this._defaultConfig?.success,
+      ...this._defaultConfig.success,
       ...options,
-    });
-
-    return toast;
+    })!;
   }
 
   /**
@@ -122,13 +118,11 @@ export class HotToastService implements HotToastServiceMethods {
    * @memberof HotToastService
    */
   loading(message?: Content, options?: ToastOptions): CreateHotToastRef {
-    const toast = this.createToast(message || this._defaultConfig.loading.content, 'loading', {
+    return this.createToast(message || this._defaultConfig.loading.content!, 'loading', {
       ...this._defaultConfig,
-      ...this._defaultConfig?.loading,
+      ...this._defaultConfig.loading,
       ...options,
-    });
-
-    return toast;
+    })!;
   }
 
   /**
@@ -140,13 +134,11 @@ export class HotToastService implements HotToastServiceMethods {
    * @memberof HotToastService
    */
   warning(message?: Content, options?: ToastOptions): CreateHotToastRef {
-    const toast = this.createToast(message || this._defaultConfig.warning.content, 'warning', {
+    return this.createToast(message || this._defaultConfig.warning.content!, 'warning', {
       ...this._defaultConfig,
-      ...this._defaultConfig?.warning,
+      ...this._defaultConfig.warning,
       ...options,
-    });
-
-    return toast;
+    })!;
   }
 
   /**
@@ -160,7 +152,7 @@ export class HotToastService implements HotToastServiceMethods {
    */
   observe<T>(messages: ObservableMessages<T>): (source: Observable<T>) => Observable<T> {
     return (source) => {
-      let toastRef: CreateHotToastRef;
+      let toastRef: CreateHotToastRef | undefined;
       let start = 0;
 
       const loadingContent = messages.loading || this._defaultConfig.loading?.content;
@@ -171,30 +163,34 @@ export class HotToastService implements HotToastServiceMethods {
         start = Date.now();
       }
 
-      return source.pipe(
-        tap({
-          next: (val) => {
-            toastRef = this.createOrUpdateToast(
-              messages,
-              val,
-              toastRef,
-              'success',
-              start === 0 ? start : Date.now() - start
-            );
-          },
-          ...(errorContent && {
-            error: (e) => {
+      if (toastRef) {
+        return source.pipe(
+          tap({
+            next: (val) => {
               toastRef = this.createOrUpdateToast(
                 messages,
-                e,
-                toastRef,
-                'error',
+                val,
+                toastRef!,
+                'success',
                 start === 0 ? start : Date.now() - start
               );
             },
-          }),
-        })
-      );
+            ...(errorContent && {
+              error: (e: any) => {
+                toastRef = this.createOrUpdateToast(
+                  messages,
+                  e,
+                  toastRef!,
+                  'error',
+                  start === 0 ? start : Date.now() - start
+                );
+              },
+            }),
+          })
+        );
+      }
+
+      return EMPTY;
     };
   }
 
@@ -214,13 +210,14 @@ export class HotToastService implements HotToastServiceMethods {
     type: ToastType,
     diff: number
   ) {
-    let content: Content | ValueOrFunction<Content, T> = null;
+    let content: Content | ValueOrFunction<Content, T>;
     let options: ToastOptions = {};
     ({ content, options } = this.getContentAndOptions<any>(
       type,
-      messages[type] || (this._defaultConfig[type] ? this._defaultConfig[type].content : '')
+      messages[type as keyof ObservableMessages<T>] ||
+        (this._defaultConfig[type] ? this._defaultConfig[type].content! : '')
     ));
-    content = resolveValueOrFunction(content, val);
+    content = resolveValueOrFunction(content, val as T);
     if (toastRef) {
       toastRef.updateMessage(content);
       const updatedOptions: UpdateToastOptions = {
@@ -241,13 +238,13 @@ export class HotToastService implements HotToastServiceMethods {
     type: ToastType,
     options?: DefaultToastOptions,
     observableMessages?: ObservableMessages<T>
-  ): CreateHotToastRef {
+  ): CreateHotToastRef | undefined {
     const now = Date.now();
     const id = options?.id ?? now.toString();
 
     if (
       !this.isDuplicate(id) &&
-      (!options.persist?.enabled || (options.persist?.enabled && this.handleStorageValue(id, options)))
+      (!options?.persist?.enabled || (options.persist?.enabled && this.handleStorageValue(id, options)))
     ) {
       const toast: Toast = {
         ariaLive: options?.ariaLive ?? 'polite',
@@ -258,7 +255,7 @@ export class HotToastService implements HotToastServiceMethods {
         role: options?.role ?? 'status',
         type,
         visible: true,
-        observableMessages: observableMessages ?? undefined,
+        observableMessages: (observableMessages as ObservableMessages<unknown>) ?? undefined,
         ...options,
       };
 
@@ -283,12 +280,12 @@ export class HotToastService implements HotToastServiceMethods {
    * Count can not be less than 0.
    */
   private handleStorageValue(id: string, options: DefaultToastOptions): number {
-    let count = 1;
+    let count: number;
     const persist = { ...this._defaultPersistConfig, ...options.persist };
     const storage: Storage = persist.storage === 'local' ? localStorage : sessionStorage;
-    const key = persist.key.replace(/\${id}/g, id);
+    const key = persist.key!.replace(/\${id}/g, id);
 
-    let item: string | number = storage.getItem(key);
+    let item: string | number = storage.getItem(key)!;
 
     if (item) {
       item = parseInt(item, 10);
@@ -298,7 +295,7 @@ export class HotToastService implements HotToastServiceMethods {
         count = item;
       }
     } else {
-      count = persist.count;
+      count = persist.count!;
     }
 
     storage.setItem(key, count.toString());
@@ -329,10 +326,7 @@ export class HotToastService implements HotToastServiceMethods {
   }
 
   private createLoadingToast<T>(messages: Content | ObservableLoading) {
-    let content: Content | ValueOrFunction<Content, T> = null;
-    let options: ToastOptions = {};
-
-    ({ content, options } = this.getContentAndOptions<any>('loading', messages));
+    const { content, options = {} } = this.getContentAndOptions<any>('loading', messages);
 
     return this.loading(content as Content, options);
   }

@@ -12,13 +12,13 @@ export class ToastConfig implements DefaultToastOptions {
   ariaLive: ToastAriaLive = 'polite';
   role: ToastRole = 'status';
   position: ToastPosition = 'top-center';
-  className: string;
+  className!: string;
   closeStyle: any;
-  dismissible: boolean;
+  dismissible!: boolean;
   autoClose = true;
-  duration: number;
-  icon: Content;
-  iconTheme: IconTheme;
+  duration!: number;
+  icon!: Content;
+  iconTheme!: IconTheme;
   style: any;
   theme: ToastTheme = 'toast';
 

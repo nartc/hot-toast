@@ -6,8 +6,8 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   styleUrls: ['./emoji-button.component.scss'],
 })
 export class EmojiButtonComponent {
-  @Input() emoji: string;
-  @Input() className: string;
-  @Input() btnId: string;
+  @Input() emoji!: string;
+  @Input() className!: string;
+  @Input() btnId!: string;
   @Output() btnClick = new EventEmitter();
 }

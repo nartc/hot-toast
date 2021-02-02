@@ -20,29 +20,29 @@ import { animate } from '../../utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HotToastComponent implements AfterViewInit, OnDestroy {
-  @Input() toast: Toast;
+  @Input() toast!: Toast;
   @Input() offset = 0;
-  @Input() defaultConfig: ToastConfig;
-  @Input() toastRef: CreateHotToastRef;
+  @Input() defaultConfig?: ToastConfig;
+  @Input() toastRef!: CreateHotToastRef;
 
   @Output() height = new EventEmitter<number>();
   @Output() beforeClosed = new EventEmitter();
   @Output() afterClosed = new EventEmitter<HotToastClose>();
 
-  @ViewChild('hotToastBarBase') private toastBarBase: ElementRef<HTMLElement>;
+  @ViewChild('hotToastBarBase') private toastBarBase!: ElementRef<HTMLElement>;
 
   isManualClose = false;
 
   ngAfterViewInit() {
     const nativeElement = this.toastBarBase.nativeElement;
-    this.height.emit(nativeElement.offsetHeight);
+    this.height.emit(nativeElement?.offsetHeight);
 
-    nativeElement.addEventListener('animationstart', (ev: AnimationEvent) => {
+    nativeElement?.addEventListener('animationstart', (ev: AnimationEvent) => {
       if (this.isExitAnimation(ev)) {
         this.beforeClosed.emit();
       }
     });
-    nativeElement.addEventListener('animationend', (ev: AnimationEvent) => {
+    nativeElement?.addEventListener('animationend', (ev: AnimationEvent) => {
       if (this.isExitAnimation(ev)) {
         this.afterClosed.emit({ dismissedByAction: this.isManualClose, id: this.toast.id });
       }
@@ -50,14 +50,14 @@ export class HotToastComponent implements AfterViewInit, OnDestroy {
   }
 
   get containerPositionStyle() {
-    const top = this.toast.position.includes('top');
+    const top = this.toast.position?.includes('top');
     const verticalStyle = top ? { top: 0 } : { bottom: 0 };
 
-    const horizontalStyle = this.toast.position.includes('left')
+    const horizontalStyle = this.toast.position?.includes('left')
       ? {
           left: 0,
         }
-      : this.toast.position.includes('right')
+      : this.toast.position?.includes('right')
       ? {
           right: 0,
         }
@@ -74,7 +74,7 @@ export class HotToastComponent implements AfterViewInit, OnDestroy {
   }
 
   get toastBarBaseStyles() {
-    const top = this.toast.position.includes('top');
+    const top = this.toast.position?.includes('top');
 
     const enterAnimation = `hotToastEnterAnimation${
       top ? 'Negative' : 'Positive'
@@ -95,7 +95,7 @@ export class HotToastComponent implements AfterViewInit, OnDestroy {
 
   close() {
     this.isManualClose = true;
-    const top = this.toast.position.includes('top');
+    const top = this.toast.position?.includes('top');
 
     const exitAnimation = `hotToastExitAnimation${
       top ? 'Negative' : 'Positive'
